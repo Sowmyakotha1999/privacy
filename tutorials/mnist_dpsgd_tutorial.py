@@ -32,7 +32,7 @@ flags.DEFINE_float('noise_multiplier', 1.1,
                    'Ratio of the standard deviation to the clipping norm')
 flags.DEFINE_float('l2_norm_clip', 1.0, 'Clipping norm')
 flags.DEFINE_integer('batch_size', 256, 'Batch size')
-flags.DEFINE_integer('epochs', 30, 'Number of epochs')
+flags.DEFINE_integer('epochs', 1, 'Number of epochs')
 flags.DEFINE_integer(
     'microbatches', 256, 'Number of microbatches '
     '(must evenly divide batch_size)')
@@ -102,16 +102,13 @@ def main(unused_argv):
       model_fn=cnn_model_fn, model_dir=FLAGS.model_dir)
 
   # Training loop.
-  FLAGS.steps_per_epoch = 100  # Change this to your desired value
-
-  # Decrease the number of epochs
-  FLAGS.epochs = 10
+  steps_per_epoch = 60000 // FLAGS.batch_size
   for epoch in range(1, FLAGS.epochs + 1):
     start_time = time.time()
     # Train the model for one epoch.
     mnist_classifier.train(
         input_fn=common.make_input_fn('train', FLAGS.batch_size),
-        steps=FLAGS.steps_per_epoch)
+        steps=steps_per_epoch)
     end_time = time.time()
     logging.info('Epoch %d time in seconds: %.2f', epoch, end_time - start_time)
 
@@ -125,7 +122,7 @@ def main(unused_argv):
     if FLAGS.dpsgd:
       if FLAGS.noise_multiplier > 0.0:
         eps, _ = compute_dp_sgd_privacy_lib.compute_dp_sgd_privacy(
-            100, FLAGS.batch_size, FLAGS.noise_multiplier, epoch, 1e-5)
+            60000, FLAGS.batch_size, FLAGS.noise_multiplier, epoch, 1e-5)
         print('For delta=1e-5, the current epsilon is: %.2f' % eps)
       else:
         print('Trained with DP-SGD but with zero noise.')

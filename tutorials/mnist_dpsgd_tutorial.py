@@ -125,7 +125,7 @@ def main(unused_argv):
     if FLAGS.dpsgd:
       if FLAGS.noise_multiplier > 0.0:
         eps, _ = compute_dp_sgd_privacy_lib.compute_dp_sgd_privacy(
-            60000, FLAGS.batch_size, FLAGS.noise_multiplier, epoch, 1e-5)
+            100, FLAGS.batch_size, FLAGS.noise_multiplier, epoch, 1e-5)
         print('For delta=1e-5, the current epsilon is: %.2f' % eps)
       else:
         print('Trained with DP-SGD but with zero noise.')
